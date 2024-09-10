@@ -1,37 +1,21 @@
 'use client';
 
-// pages/expenses/index.tsx
-import { useState, useEffect, useCallback } from 'react';
-import { addExpense, deleteExpenseById, getExpenses } from '../lib/expenses';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect} from 'react';
+import { addExpense, deleteExpenseById } from './../lib/expenses';
+import { useAuth } from './../context/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
-import Link from 'next/link'; // Importa Link para navegación
+import Link from 'next/link';
 
-interface Expense {
-  id: string;
-  name: string;
-  amount: number;
-}
 
 export default function Expenses() {
-  const { user } = useAuth();
-  const [newExpense, setNewExpense] = useState<{ name: string; amount: number }>({ name: '', amount: 0 });
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-
-  const fetchExpenses = useCallback(async () => {
-    if (user) {
-      try {
-        const userExpenses = await getExpenses(user.uid);
-        setExpenses(userExpenses);
-      } catch (error) {
-        console.error('Error fetching expenses:', error);
-      }
-    }
-  }, [user]);
+  const { user, expenses, refreshExpenses } = useAuth();
+  const [newExpense, setNewExpense] = useState<Omit<Expense,'id'>>({ name: '', amount: 0 });
 
   useEffect(() => {
-    fetchExpenses();
-  }, [fetchExpenses]);
+    if (user) {
+      refreshExpenses();
+    }
+  }, [user, refreshExpenses]);
 
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +23,7 @@ export default function Expenses() {
       try {
         await addExpense({ ...newExpense, userId: user.uid, id: uuidv4() });
         setNewExpense({ name: '', amount: 0 });
-        fetchExpenses();
+        await refreshExpenses(); // Actualiza los gastos después de agregar uno
       } catch (error) {
         console.error('Error adding expense:', error);
       }
@@ -49,20 +33,20 @@ export default function Expenses() {
   const handleDeleteExpense = async (id: string) => {
     try {
       await deleteExpenseById(id);
-      fetchExpenses();
+      await refreshExpenses(); // Actualiza los gastos después de eliminar uno
     } catch (error) {
       console.error('Error deleting expense:', error);
     }
   };
 
+  
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header className="bg-blue-600 text-black p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-white">Gastos del Usuario</h1>
           <Link href="/" className="bg-blue-800 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
-              Home
-            
+            Home
           </Link>
         </div>
       </header>
@@ -93,23 +77,43 @@ export default function Expenses() {
               </button>
             </div>
           </form>
-          <ul>
-            {expenses.map((expense) => (
-              <li key={expense.id} className="flex justify-between items-center bg-gray-50 border border-gray-200 rounded-lg mb-2 p-4 text-black">
-                <div>
-                  <span className="font-medium">{expense.name}</span>: ${expense.amount}
-                </div>
-                <button 
-                  onClick={() => handleDeleteExpense(expense.id)}
-                  className="bg-red-600 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded"
-                >
-                  Eliminar
-                </button>
-              </li>
-            ))}
-          </ul>
+          <ExpensesList expenses={expenses} handleDeleteExpense={handleDeleteExpense} />
         </div>
       </main>
     </div>
   );
+}
+
+
+interface expensesListProps {
+  expenses: Expense[];
+  handleDeleteExpense: (id: string) => void; // Función para eliminar un gasto por ID
+
+}
+
+
+const ExpensesList:React.FC<expensesListProps> = ({expenses,handleDeleteExpense}) =>{
+  const totalExpenses = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+
+  return(
+    <ul>
+      {expenses.map((expense) => (
+        <li key={expense.id} className="flex justify-between items-center bg-gray-50 border border-gray-200 rounded-lg mb-2 p-4 text-black">
+          <div>
+            <span className="font-medium">{expense.name}</span>: ${expense.amount}
+          </div>
+          <button 
+            onClick={() => handleDeleteExpense(expense.id)}
+            className="bg-red-600 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded"
+          >
+            Eliminar
+          </button>
+        </li>
+      ))}
+
+      <div className="mt-4 text-xl font-semibold text-black">
+        Total: ${totalExpenses.toFixed(2)}
+      </div>
+    </ul>
+  )
 }
