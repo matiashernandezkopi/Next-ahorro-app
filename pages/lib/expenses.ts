@@ -1,3 +1,5 @@
+'use client';
+
 // lib/expenses.ts
 import { db } from './firebase';
 import { collection, addDoc, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';

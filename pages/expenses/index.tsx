@@ -1,9 +1,11 @@
+'use client';
+
 // pages/expenses/index.tsx
 import { useState, useEffect, useCallback } from 'react';
 import { addExpense, deleteExpenseById, getExpenses } from '../lib/expenses';
 import { useAuth } from '../context/AuthContext';
-import router from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
+import Link from 'next/link'; // Importa Link para navegación
 
 interface Expense {
   id: string;
@@ -58,12 +60,10 @@ export default function Expenses() {
       <header className="bg-blue-600 text-black p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-white">Gastos del Usuario</h1>
-          <button 
-            onClick={() => router.push('/')} 
-            className="bg-blue-800 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-          >
-            Home
-          </button>
+          <Link href="/" className="bg-blue-800 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+              Home
+            
+          </Link>
         </div>
       </header>
       <main className="flex-1 container mx-auto p-6">
