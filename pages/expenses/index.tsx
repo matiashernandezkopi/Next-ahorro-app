@@ -5,6 +5,8 @@ import { addExpense, deleteExpenseById } from './../lib/expenses';
 import { useAuth } from './../context/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
+import { ExpensesList } from './expensesList';
+import { ExpensesForm } from './expensesForm';
 
 
 export default function Expenses() {
@@ -19,6 +21,19 @@ export default function Expenses() {
 
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+
+
+
+    // valoracion de datos
+    if (!newExpense.name.trim()) {
+      alert('Ingrese un nombre para el gasto');
+      return;
+    }
+    if (newExpense.amount <= 0) {
+      alert('Ingrese un monto válido para el gasto');
+      return;
+    }
+
     if (user) {
       try {
         await addExpense({ ...newExpense, userId: user.uid, id: uuidv4() });
@@ -52,68 +67,10 @@ export default function Expenses() {
       </header>
       <main className="flex-1 container mx-auto p-6">
         <div className="bg-white shadow-md rounded-lg p-6">
-          <form onSubmit={handleAddExpense} className="mb-6">
-            <h2 className="text-xl font-semibold mb-4 text-black">Agregar Gasto</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input 
-                type="text" 
-                placeholder="Nombre del Gasto" 
-                value={newExpense.name} 
-                onChange={(e) => setNewExpense({ ...newExpense, name: e.target.value })}
-                className="border border-gray-300 rounded-lg px-4 py-2 w-full text-black"
-              />
-              <input 
-                type="number" 
-                placeholder="Cantidad" 
-                value={newExpense.amount} 
-                onChange={(e) => setNewExpense({ ...newExpense, amount: Number(e.target.value) })}
-                className="border border-gray-300 rounded-lg px-4 py-2 w-full text-black"
-              />
-              <button 
-                type="submit" 
-                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded col-span-2"
-              >
-                Agregar Gasto
-              </button>
-            </div>
-          </form>
+          <ExpensesForm newExpense={newExpense} handleAddExpense={handleAddExpense} setNewExpense={setNewExpense}/>
           <ExpensesList expenses={expenses} handleDeleteExpense={handleDeleteExpense} />
         </div>
       </main>
     </div>
   );
-}
-
-
-interface expensesListProps {
-  expenses: Expense[];
-  handleDeleteExpense: (id: string) => void; // Función para eliminar un gasto por ID
-
-}
-
-
-const ExpensesList:React.FC<expensesListProps> = ({expenses,handleDeleteExpense}) =>{
-  const totalExpenses = expenses.reduce((acc, expense) => acc + expense.amount, 0);
-
-  return(
-    <ul>
-      {expenses.map((expense) => (
-        <li key={expense.id} className="flex justify-between items-center bg-gray-50 border border-gray-200 rounded-lg mb-2 p-4 text-black">
-          <div>
-            <span className="font-medium">{expense.name}</span>: ${expense.amount}
-          </div>
-          <button 
-            onClick={() => handleDeleteExpense(expense.id)}
-            className="bg-red-600 hover:bg-red-500 text-white font-semibold py-1 px-3 rounded"
-          >
-            Eliminar
-          </button>
-        </li>
-      ))}
-
-      <div className="mt-4 text-xl font-semibold text-black">
-        Total: ${totalExpenses.toFixed(2)}
-      </div>
-    </ul>
-  )
 }
