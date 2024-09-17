@@ -17,6 +17,11 @@ export default function Home() {
               Ver Gastos
             
           </Link>
+          <Link href="/sales"
+            className="block bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded transition duration-200">
+              Ver Ventas
+            
+          </Link>
         </nav>
       </div>
     </div>

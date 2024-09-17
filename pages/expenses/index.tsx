@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
 import { ExpensesList } from './expensesList';
 import { ExpensesForm } from './expensesForm';
+import { ExpensesBarChart } from './barcharm';
 
 
 export default function Expenses() {
@@ -29,10 +30,7 @@ export default function Expenses() {
       alert('Ingrese un nombre para el gasto');
       return;
     }
-    if (newExpense.amount <= 0) {
-      alert('Ingrese un monto válido para el gasto');
-      return;
-    }
+    
 
     if (user) {
       try {
@@ -66,7 +64,18 @@ export default function Expenses() {
         </div>
       </header>
       <main className="flex-1 container mx-auto p-6">
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="bg-white shadow-md rounded-lg p-6"> 
+
+
+          {/** boton para consol.log(expenses) */}
+
+          <button onClick={()=>{console.log(expenses)}}>
+            click
+          </button>
+
+          <ExpensesBarChart/>
+
+
           <ExpensesForm newExpense={newExpense} handleAddExpense={handleAddExpense} setNewExpense={setNewExpense}/>
           <ExpensesList expenses={expenses} handleDeleteExpense={handleDeleteExpense} />
         </div>

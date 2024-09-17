@@ -4,13 +4,15 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { getExpenses } from '../lib/expenses';
-
+import { getSales } from '../lib/sales'; // Importar la función de ventas
 
 interface AuthContextType {
   user: User | null;
   signOutUser: () => Promise<void>;
   expenses: Expense[];
-  refreshExpenses: () => Promise<void>; 
+  sales: Sales[]; // Nuevo estado para las ventas
+  refreshExpenses: () => Promise<void>;
+  refreshSales: () => Promise<void>; // Nueva función para refrescar las ventas
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [sales, setSales] = useState<Sales[]>([]); // Estado para las ventas
 
   const refreshExpenses = useCallback(async () => {
     if (user) {
@@ -30,24 +33,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  const refreshSales = useCallback(async () => {
+    if (user) {
+      try {
+        const userSales = await getSales(user.uid); // Obtener las ventas del usuario
+        setSales(userSales);
+      } catch (error) {
+        console.error('Error fetching sales:', error);
+      }
+    }
+  }, [user]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
         await refreshExpenses(); 
+        await refreshSales(); // Refrescar las ventas cuando el usuario inicia sesión
       } else {
         setExpenses([]);
+        setSales([]); // Limpiar las ventas cuando el usuario cierra sesión
       }
     });
     return () => unsubscribe();
-  }, [refreshExpenses]); 
+  }, [refreshExpenses, refreshSales]);
 
   const signOutUser = async () => {
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, signOutUser, expenses, refreshExpenses }}>
+    <AuthContext.Provider value={{ user, signOutUser, expenses, sales, refreshExpenses, refreshSales }}>
       {children}
     </AuthContext.Provider>
   );
