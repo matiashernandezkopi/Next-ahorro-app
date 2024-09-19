@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { addExpense, deleteExpenseById } from './../lib/expenses';
 import { useAuth } from './../context/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,10 +9,9 @@ import { ExpensesList } from './expensesList';
 import { ExpensesForm } from './expensesForm';
 import { ExpensesBarChart } from './barcharm';
 
-
 export default function Expenses() {
   const { user, expenses, refreshExpenses } = useAuth();
-  const [newExpense, setNewExpense] = useState<Omit<Expense,'id'>>({ name: '', amount: 0 });
+  const [newExpense, setNewExpense] = useState<Omit<Expense, 'id'>>({ name: '', amount: 0 });
 
   useEffect(() => {
     if (user) {
@@ -23,14 +22,11 @@ export default function Expenses() {
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
-
-    // valoracion de datos
+    // Validación de datos
     if (!newExpense.name.trim()) {
       alert('Ingrese un nombre para el gasto');
       return;
     }
-    
 
     if (user) {
       try {
@@ -52,31 +48,25 @@ export default function Expenses() {
     }
   };
 
-  
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-blue-600 text-black p-4">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+      <header className="bg-blue-600 dark:bg-blue-800 text-black dark:text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">Gastos del Usuario</h1>
-          <Link href="/" className="bg-blue-800 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+          <h1 className="text-2xl font-bold">Gastos del Usuario</h1>
+          <Link href="/" className="bg-blue-800 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
             Home
           </Link>
         </div>
       </header>
       <main className="flex-1 container mx-auto p-6">
-        <div className="bg-white shadow-md rounded-lg p-6"> 
-
-
-          {/** boton para consol.log(expenses) */}
-
-          <button onClick={()=>{console.log(expenses)}}>
-            click
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+          {/** Botón para consol.log(expenses) */}
+          <button onClick={() => { console.log(expenses) }} className="bg-blue-500 dark:bg-blue-600 hover:bg-blue-400 dark:hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded mb-4">
+            Click
           </button>
 
-          <ExpensesBarChart/>
-
-
-          <ExpensesForm newExpense={newExpense} handleAddExpense={handleAddExpense} setNewExpense={setNewExpense}/>
+          <ExpensesBarChart />
+          <ExpensesForm newExpense={newExpense} handleAddExpense={handleAddExpense} setNewExpense={setNewExpense} />
           <ExpensesList expenses={expenses} handleDeleteExpense={handleDeleteExpense} />
         </div>
       </main>
