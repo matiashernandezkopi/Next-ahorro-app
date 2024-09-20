@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
 import { SalesList } from './salesList';
 import { SalesForm } from './salesForm';
-import { format } from 'date-fns';
+import { format, getYear } from 'date-fns';
 import { SalesChart } from './barchar';
 
 interface Sales {
@@ -19,15 +19,15 @@ interface Sales {
 
 const BASIC_DATA: Omit<Sales, 'id' | 'date'> = { amount: 0, client: '' };
 const initialDate = format(new Date(), 'dd/MM/yyyy'); // Establecer la fecha inicial en formato "día/mes/año"
-const RESET:Omit<Sales, 'id'> = {
+const RESET: Omit<Sales, 'id'> = {
   ...BASIC_DATA,
   date: initialDate, // Asegúrate de que 'date' esté aquí
-}
+};
 
 export default function Sales() {
   const { user, sales, refreshSales } = useAuth();
   const [newSale, setNewSale] = useState<Omit<Sales, 'id'>>(RESET);
-  
+  const [selectedYear, setSelectedYear] = useState(getYear(new Date())); // Estado para el año seleccionado
 
   useEffect(() => {
     if (user) {
@@ -64,6 +64,13 @@ export default function Sales() {
     }
   };
 
+  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(Number(event.target.value)); // Actualiza el año seleccionado
+  };
+
+  // Obtener los años disponibles de las ventas
+  const availableYears = Array.from(new Set(sales.map((sale) => getYear(new Date(sale.date)))));
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-black dark:text-white flex flex-col">
       <header className="bg-blue-600 dark:bg-gray-800 text-black dark:text-white p-4">
@@ -81,11 +88,34 @@ export default function Sales() {
             <button onClick={() => { console.log(sales); }} className="mb-4 bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-4 py-2 rounded">
               Click
             </button>
-            <SalesList sales={sales} handleDeleteSale={handleDeleteSale} />
-          
+            <SalesList sales={sales} handleDeleteSale={handleDeleteSale} selectedYear={selectedYear}/>
           </div>
-          <SalesChart sales={sales} />
+          <div>
+            <label htmlFor="year-select" className="block mb-2">
+              Selecciona el año:
+            </label>
+            <select
+              id="year-select"
+              value={selectedYear}
+              onChange={handleYearChange}
+              className="border p-2 rounded dark:bg-gray-700 dark:text-white"
+            >
+              {availableYears.map((year) => {
+                if (isNaN(year)) {
+                  return
+                }
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                )
+              })}
+            
+            </select>
 
+            {/* Puedes agregar más gráficos de barras aquí y pasar el mismo selectedYear */}
+          </div>
+            <SalesChart sales={sales} selectedYear={selectedYear} />
         </div>
       </main>
     </div>
