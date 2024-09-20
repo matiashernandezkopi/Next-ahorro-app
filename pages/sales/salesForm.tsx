@@ -38,10 +38,11 @@ export const SalesForm: React.FC<SalesFormProps> = ({ handleAddSale, newSale, se
         />
         <button
           type="submit"
-          className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded col-span-2"
+          className="bg-chart-1  hover:bg-chart-1-hover  text-white font-semibold py-2 px-4 rounded col-span-2"
         >
           Agregar Venta
         </button>
+
       </div>
     </form>
   );
