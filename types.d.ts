@@ -1,7 +1,11 @@
+
+
 interface Expense {
     id: string;
-    name: string;
+    date: string;
+    client: string; //rason o nombre
     amount: number;
+    userId: string;
 }
 
 interface Sales {

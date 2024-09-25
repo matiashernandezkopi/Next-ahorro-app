@@ -28,6 +28,12 @@ export default function Home() {
           >
             Ver Ventas
           </Link>
+          <Link
+            href="/salesAndExpenses"
+            className="block bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded transition duration-200 dark:bg-green-700 dark:hover:bg-green-600"
+          >
+            Ver Ventas y Gastos
+          </Link>
         </nav>
       </div>
     </div>

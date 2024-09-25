@@ -5,10 +5,10 @@ import { addSale, deleteSaleById } from './../lib/sales';
 import { useAuth } from './../context/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
-import { SalesList } from './salesList';
-import { SalesForm } from './salesForm';
+import { SalesList } from '../salesAndExpenses/salesList';
+import { SalesForm } from '../salesAndExpenses/salesForm';
 import { format, getYear } from 'date-fns';
-import { SalesChart } from './barchar';
+import { MonthBarchar } from '../salesAndExpenses/monthBarchar';
 
 interface Sales {
   id: string;
@@ -115,7 +115,7 @@ export default function Sales() {
 
             {/* Puedes agregar más gráficos de barras aquí y pasar el mismo selectedYear */}
           </div>
-            <SalesChart sales={sales} selectedYear={selectedYear} />
+            <MonthBarchar data={sales} selectedYear={selectedYear} />
         </div>
       </main>
     </div>

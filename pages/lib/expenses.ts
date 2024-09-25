@@ -4,12 +4,7 @@
 import { db } from './firebase';
 import { collection, addDoc, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 
-interface Expense {
-  id: string;
-  name: string;
-  amount: number;
-  userId: string;
-}
+
 
 // Función para agregar un gasto
 export async function addExpense(expense: Expense): Promise<void> {

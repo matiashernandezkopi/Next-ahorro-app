@@ -81,7 +81,7 @@ export function ExpensesBarChart() {
   // Mapea los datos de expenses a la forma esperada por el gráfico
   const chartData = useMemo(() => 
     expenses.map(expense => ({
-      name: expense.name || "Unknown",  // Usa un valor predeterminado si el nombre está vacío
+      name: expense.client || "Unknown",  // Usa un valor predeterminado si el nombre está vacío
       amount: expense.amount,
       id: expense.id
     })),

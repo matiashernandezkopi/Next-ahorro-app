@@ -6,24 +6,24 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "
 import { format, isValid, parse, getYear } from "date-fns";
 import { es } from "date-fns/locale";
 
-interface Sales {
+interface data {
   id: string;
   date: string;
   client: string;
   amount: number;
 }
 
-interface SalesChartProps {
-  sales: Sales[];
+interface dataChartProps {
+  data: Sales[];
   selectedYear: number; // Recibe el año seleccionado como prop
 }
 
-export function SalesChart({ sales, selectedYear }: SalesChartProps) {
+export function MonthBarchar({ data, selectedYear }: dataChartProps) {
   // Función para agrupar ventas por mes y calcular totales solo del año seleccionado
-  const getMonthlySalesData = (sales: Sales[], year: number) => {
+  const getMonthlydataData = (data: data[], year: number) => {
     const monthlyData: { month: string; total: number; date: Date }[] = [];
 
-    sales.forEach((sale) => {
+    data.forEach((sale) => {
       const saleDate = parse(sale.date, "dd/MM/yyyy", new Date());
 
       // Verifica si la fecha es válida y pertenece al año seleccionado
@@ -45,7 +45,7 @@ export function SalesChart({ sales, selectedYear }: SalesChartProps) {
     return monthlyData.sort((a, b) => a.date.getTime() - b.date.getTime());
   };
 
-  const chartData = getMonthlySalesData(sales, selectedYear); // Filtrar las ventas por el año seleccionado
+  const chartData = getMonthlydataData(data, selectedYear); // Filtrar las ventas por el año seleccionado
 
   const chartConfig = {
     total: {
