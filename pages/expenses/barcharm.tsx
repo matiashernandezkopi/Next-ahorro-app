@@ -1,9 +1,8 @@
-"use client"
-
-import { TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, Cell, Tooltip, LabelList, TooltipProps } from "recharts"
-
+import { TrendingUp } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, Cell, Tooltip, LabelList, TooltipProps } from "recharts";
 import { useMemo } from "react";
+import { format, parse } from "date-fns";
+import { es } from "date-fns/locale"; // Importamos el locale español
 
 import {
   Card,
@@ -12,108 +11,86 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
-} from "@/components/ui/chart"
-import { useAuth } from "../context/AuthContext"
+} from "@/components/ui/chart";
+import { useAuth } from "../context/AuthContext";
 
-export const description = "A bar chart with expenses data"
-
-/*const chartData = [
-  {
-    id: "22b3caf4-3255-487b-9bd3-ae86e080f27f",
-    amount: 2.36,
-    userId: "AIZ1yKA4sfZOMofKyV2WpqhlNQ83",
-    name: "sdsd",
-  },
-  {
-    id: "28e16a16-1156-4bea-add9-b9b68cd6602e",
-    userId: "AIZ1yKA4sfZOMofKyV2WpqhlNQ83",
-    amount: 250.5,
-    name: "hhghg",
-  },
-  {
-    id: "28e16a16-1156-4bea-02e",
-    userId: "AIZ1yKA4sfZOMofKyV2WpqhlNQ83",
-    amount: -250.5,
-    name: "menos-g",
-  },
-  {
-    id: "49a3332f-748c-482b-b38f-f78d162ce44b",
-    amount: 22,
-    name: "holaaa",
-    userId: "AIZ1yKA4sfZOMofKyV2WpqhlNQ83",
-  },
-  // Incluye el resto de los objetos
-]
-*/
-
+// Configuración del gráfico
 const chartConfig = {
   amount: {
     label: "Amount",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
+
+type Transaction = {
+  amount: number;
+  date: string; // Formato 'dd/MM/yyyy'
+};
 
 
-
-
-
-// Función para renderizar el contenido del tooltip
+// Tooltip personalizado
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="custom-tooltip bg-white p-2 border rounded-md shadow-lg">
-        <p className="label">{`Name: ${data.name}`}</p>
-        <p className="intro">{`Amount: ${data.amount}`}</p>
+      <div className="custom-tooltip bg-white dark:bg-black p-2 border rounded-md shadow-lg dark:text-white">
+        <p className="label">{`Month: ${data.month}`}</p> {/* Muestra el nombre del mes */}
+        <p className="intro">{`Difference: ${data.amount.toFixed(2)}`}</p>
       </div>
     );
   }
   return null;
 };
 
+// Función para agrupar datos por mes
+const groupDataByMonth = (data: Transaction[], type: 'sales' | 'expenses') => {
+  return data.reduce((acc, item) => {
+    // Parseamos la fecha y formateamos el mes en texto largo
+    const month = format(parse(item.date, 'dd/MM/yyyy', new Date()), 'MMMM', { locale: es });
+    if (!acc[month]) {
+      acc[month] = { sales: 0, expenses: 0 };
+    }
+    acc[month][type] += item.amount;
+    return acc;
+  }, {} as Record<string, { sales: number, expenses: number }>);
+};
+
 export function ExpensesBarChart() {
+  const { expenses, sales } = useAuth();
 
-    const { expenses } = useAuth();
+  // Combina los datos de ventas y gastos mes a mes
+  const chartData = useMemo(() => {
+    const groupedSales = groupDataByMonth(sales, 'sales');
+    const groupedExpenses = groupDataByMonth(expenses, 'expenses');
 
-  // Mapea los datos de expenses a la forma esperada por el gráfico
-  const chartData = useMemo(() => 
-    expenses.map(expense => ({
-      name: expense.client || "Unknown",  // Usa un valor predeterminado si el nombre está vacío
-      amount: expense.amount,
-      id: expense.id
-    })),
-    [expenses]
-  );
-
-
+    // Combina los resultados y calcula la diferencia (sales - expenses)
+    const allMonths = new Set([...Object.keys(groupedSales), ...Object.keys(groupedExpenses)]);
+    return Array.from(allMonths).map(month => ({
+      month,
+      amount: (groupedSales[month]?.sales || 0) - (groupedExpenses[month]?.expenses || 0),
+    }));
+  }, [expenses, sales]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Bar Chart - Expenses</CardTitle>
-        <CardDescription>Overview of amounts</CardDescription>
+        <CardTitle>Monthly Sales - Expenses Difference</CardTitle>
+        <CardDescription>Overview of sales minus expenses by month</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+          <BarChart data={chartData}>
             <CartesianGrid vertical={false} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="amount">
-
-                <LabelList dataKey="name" position="top" fillOpacity={1} />
-                <LabelList
-                    dataKey="amount"
-                    position="insideTop"
-                    fill="#ffffff"
-                    formatter={(value: number) => `${value}`}
-                />
+              <LabelList dataKey="month" position="top" fillOpacity={1} />
               {chartData.map((item) => (
                 <Cell
-                  key={item.id}
-                  fill={item.amount > 0 ? "rgba(255, 99, 132, 0.6)" : "rgba(54, 162, 235, 0.6)"} // Colores suaves y transparentes
+                  key={item.month}
+                  fill={item.amount > 0 ? "rgba(54, 162, 235, 0.6)" : "rgba(255, 99, 132, 0.6)"}
                 />
               ))}
             </Bar>
@@ -129,5 +106,5 @@ export function ExpensesBarChart() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

@@ -115,8 +115,8 @@ export default function Expenses() {
           </div>
 
           <ExpensesBarChart />
-          <SalesForm newSale={newExpense} handleAddSale={handleAddExpense} setNewSale={setNewExpense} />
-          <SalesList sales={expenses} selectedYear={selectedYear} handleDeleteSale={handleDeleteExpense}/>
+          <SalesForm newSale={newExpense} handleAddSale={handleAddExpense} setNewSale={setNewExpense} type={'Gasto'}/>
+          <SalesList sales={expenses} selectedYear={selectedYear} handleDeleteSale={handleDeleteExpense} negative={true}/>
           {/** <SalesChart sales={expenses} selectedYear={} /> */}
         </div>
       </main>

@@ -84,11 +84,11 @@ export default function Sales() {
       <main className="flex-1 container mx-auto p-6">
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 flex w-full justify-between gap-5">
           <div>
-            <SalesForm newSale={newSale} handleAddSale={handleAddSale} setNewSale={setNewSale} />
+            <SalesForm newSale={newSale} handleAddSale={handleAddSale} setNewSale={setNewSale} type={'Venta'}/>
             <button onClick={() => { console.log(sales); }} className="mb-4 bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-4 py-2 rounded">
               Click
             </button>
-            <SalesList sales={sales} handleDeleteSale={handleDeleteSale} selectedYear={selectedYear}/>
+            <SalesList sales={sales} handleDeleteSale={handleDeleteSale} selectedYear={selectedYear} negative={false}/>
           </div>
           <div>
             <label htmlFor="year-select" className="block mb-2">

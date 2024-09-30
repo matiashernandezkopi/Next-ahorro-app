@@ -23,13 +23,14 @@ interface SalesListProps {
   sales: Sales[];
   selectedYear: number; 
   handleDeleteSale: (id: string) => void;
+  negative: boolean;
 }
 
 interface GroupedSales {
   [key: string]: Sales[]; 
 }
 
-export const SalesList: React.FC<SalesListProps> = ({ sales, selectedYear, handleDeleteSale }) => {
+export const SalesList: React.FC<SalesListProps> = ({ sales, selectedYear, handleDeleteSale, negative }) => {
   const [searchTerm, setSearchTerm] = useState(""); 
 
   const groupSalesByMonthYear = (sales: Sales[], year: number): GroupedSales => {
@@ -68,89 +69,98 @@ export const SalesList: React.FC<SalesListProps> = ({ sales, selectedYear, handl
 
   return (
     <div>
-      <TotalNumber total={totalGeneralSales} size='text-xl'>Total general: $</TotalNumber>
-      <TotalNumber total={totalYearlySales} size='text-lg'>Total del año {selectedYear}: $</TotalNumber>
+      <TotalNumber total={totalGeneralSales} size="text-xl" negative={negative}>
+        Total general: $
+      </TotalNumber>
+      <TotalNumber total={totalYearlySales} size="text-lg" negative={negative}>
+        Total del año {selectedYear}: $
+      </TotalNumber>
 
       <div className="mb-4">
-      <Input
-        placeholder="Buscar por cliente..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="p-2 border rounded border-chart-1 focus:border-chart-1 focus:outline-none"
-      />
+        <Input
+          placeholder="Buscar por cliente..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="p-2 border rounded border-chart-1 focus:border-chart-1 focus:outline-none"
+        />
       </div>
 
       {sortedMonths.map((monthYear) => {
-      const monthlySales = filteredSales(monthYear);
+        const monthlySales = filteredSales(monthYear);
 
-      // Verificar si hay ventas para el mes y el filtro actual
-      if (monthlySales.length === 0) return null;
+        if (monthlySales.length === 0) return null;
 
-      const monthlyTotal = monthlySales.reduce((acc, sale) => acc + sale.amount, 0);
+        const monthlyTotal = monthlySales.reduce((acc, sale) => acc + sale.amount, 0);
 
-      return (
-        <div key={monthYear} className="mb-6">
-          <h2 className="text-2xl font-semibold mb-4 text-black dark:text-white text-center">
-            {format(parse(`01/${monthYear}`, 'dd/MM/yyyy', new Date()), 'MMMM', { locale: es })}
-          </h2>
+        return (
+          <div key={monthYear} className="mb-6">
+            <h2 className="text-2xl font-semibold mb-4 text-black dark:text-white text-center">
+              {format(parse(`01/${monthYear}`, 'dd/MM/yyyy', new Date()), 'MMMM', { locale: es })}
+            </h2>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead className="text-right">Monto</TableHead>
-                <TableHead className="text-right">Fecha</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {monthlySales.map((sale) => (
-                <TableRow key={sale.id}>
-                  <TableCell className="font-medium">{sale.client}</TableCell>
-                  <TableCell className="text-right">
-                    ${sale.amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell className="text-right">{sale.date}</TableCell>
-                  <TableCell className="text-right">
-                    <button
-                      onClick={() => handleDeleteSale(sale.id)}
-                      className="bg-red-600 dark:bg-red-500 hover:bg-red-500 dark:hover:bg-red-400 text-white font-semibold py-1 px-3 rounded"
-                    >
-                      Eliminar
-                    </button>
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead className="text-right">Monto</TableHead>
+                  <TableHead className="text-right">Fecha</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={2}>Total del mes</TableCell>
-                <TableCell className="text-right">${monthlyTotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                <TableCell />
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </div>
-      );
-    })}
-  </div>
-);
+              </TableHeader>
+              <TableBody>
+                {monthlySales.map((sale) => (
+                  <TableRow key={sale.id}>
+                    <TableCell className="font-medium">{sale.client}</TableCell>
+                    <TableCell className={`text-right ${negative ? "text-red-700" : "text-green-700"}`}>
+                      {negative
+                        ? `-${sale.amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : `${sale.amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    </TableCell>
+                    <TableCell className="text-right">{sale.date}</TableCell>
+                    <TableCell className="text-right">
+                      <button
+                        onClick={() => handleDeleteSale(sale.id)}
+                        className="bg-red-600 dark:bg-red-500 hover:bg-red-500 dark:hover:bg-red-400 text-white font-semibold py-1 px-3 rounded"
+                      >
+                        Eliminar
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={2}>Total del mes</TableCell>
+                  <TableCell className={`text-right ${negative ? "text-red-700" : "text-green-700"}`}>
+                    {negative
+                      ? `-${monthlyTotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : `${monthlyTotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 interface TotalNumberProps {
   children: React.ReactNode; 
   total: number; 
-  size?: string; 
+  size?: string;
+  negative: boolean; 
 }
 
-const TotalNumber: React.FC<TotalNumberProps> = ({ children, total, size }) => {
+const TotalNumber: React.FC<TotalNumberProps> = ({ children, total, size, negative }) => {
   return (
-    <div className={`mt-2 ${size} font-semibold text-black dark:text-white`}>
+    <div className={`mt-2 ${size} font-semibold ${negative ? 'text-red-700' : 'text-green-700'}`}>
       {children}
-      {total.toLocaleString('es-ES', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}
+      {negative
+        ? `-${total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        : total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
     </div>
   );
-}
+};
